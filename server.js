@@ -6,7 +6,7 @@ mongoose.set("strictQuery", false);
 
 const { HOST_URI } = process.env;
 
-async function main() {
+(async function () {
   try {
     await mongoose.connect(HOST_URI);
     console.log("Database connection successful");
@@ -18,5 +18,4 @@ async function main() {
     console.error("main failed:", error.message);
     process.exit(1);
   }
-}
-main();
+})();
