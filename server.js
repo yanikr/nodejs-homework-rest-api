@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+require("dotenv").config();
 const app = require("./app");
-dotenv.config();
+
 mongoose.set("strictQuery", false);
 
 const { HOST_URI } = process.env;
