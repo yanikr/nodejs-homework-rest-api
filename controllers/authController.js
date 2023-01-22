@@ -34,7 +34,7 @@ const login = async (req, res, next) => {
     email,
   });
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  const isPasswordValid = await bcrypt.compare(password, user?.password);
 
   if (!isPasswordValid || !user) {
     next(res.status(401).json(Unauthorized("Email or password is wrong")));
@@ -55,7 +55,7 @@ const login = async (req, res, next) => {
 const logout = async (req, res) => {
   const { id } = req.user;
   await User.findByIdAndUpdate(id, { token: "" });
-  return res.status(204).json();
+  return res.status(204).end();
 };
 
 const currentUser = async (req, res) => {

@@ -34,7 +34,7 @@ const auth = async (req, res, next) => {
   const authHeader = req.headers.authorization || "";
   const [type, token] = authHeader.split(" ");
   if (type !== "Bearer") {
-    next(res.status(401).json(Unauthorized("Not authorized")));
+    return next(res.status(401).json(Unauthorized("Not authorized")));
   }
   try {
     const { id } = jwt.verify(token, JWT_SECRET);
@@ -42,7 +42,7 @@ const auth = async (req, res, next) => {
 
     req.user = user;
   } catch (error) {
-    next(res.status(401).json(Unauthorized("Not authorized")));
+    next(error);
   }
   next();
 };
