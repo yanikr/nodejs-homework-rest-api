@@ -37,7 +37,9 @@ const login = async (req, res, next) => {
   const isPasswordValid = await bcrypt.compare(password, user?.password);
 
   if (!isPasswordValid || !user) {
-    next(res.status(401).json(Unauthorized("Email or password is wrong")));
+    return next(
+      res.status(401).json(Unauthorized("Email or password is wrong"))
+    );
   }
 
   const payload = { id: user._id };

@@ -23,7 +23,7 @@ const deleteContact = async (req, res, next) => {
       return next(res.status(404).json({ message: "not found" }));
     }
   } catch (error) {
-    res.status(500).json({ message: `${error.message}` });
+    next(error);
   }
   return res.status(200).json({ message: "contact deleted" });
 };
