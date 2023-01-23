@@ -8,10 +8,10 @@ const validateBody = (schema) => {
   return (req, res, next) => {
     const { error } = schema.validate(req.body);
     if (error) {
-      return next(res.status(400).json(BadRequest("missing fields")));
+      next(BadRequest(`${error.message}`));
     }
 
-    return next();
+    next();
   };
 };
 
@@ -20,6 +20,7 @@ const addContactSchema = Joi.object({
   email: Joi.string(),
   phone: Joi.string(),
 });
+
 const joiRegisterSchema = Joi.object({
   password: Joi.string().min(6).required(),
   email: Joi.string().required(),
@@ -33,18 +34,24 @@ const updateStatusSchema = Joi.object({
 const auth = async (req, res, next) => {
   const authHeader = req.headers.authorization || "";
   const [type, token] = authHeader.split(" ");
-  if (type !== "Bearer") {
-    return next(res.status(401).json(Unauthorized("Not authorized")));
-  }
+
   try {
+    if (type !== "Bearer") {
+      throw new Unauthorized("Not authorized");
+    }
     const { id } = jwt.verify(token, JWT_SECRET);
     const user = await User.findById(id);
 
     req.user = user;
+    next();
   } catch (error) {
+    if (!error.status) {
+      console.log(error);
+      error.status = 401;
+      error.message = "Not authorized";
+    }
     next(error);
   }
-  next();
 };
 module.exports = {
   validateBody,

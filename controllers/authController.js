@@ -2,6 +2,7 @@ const { User } = require("../models/user");
 const jwt = require("jsonwebtoken");
 const { Conflict, Unauthorized } = require("http-errors");
 const bcrypt = require("bcrypt");
+
 const { JWT_SECRET } = process.env;
 
 const register = async (req, res, next) => {
@@ -9,10 +10,15 @@ const register = async (req, res, next) => {
   const salt = await bcrypt.genSalt();
   const hashedPassword = await bcrypt.hash(password, salt);
   try {
+    const findUser = await User.findOne({ email });
+    if (findUser) {
+      throw new Conflict("Email in use");
+    }
     const user = await User.create({
       email,
       password: hashedPassword,
     });
+
     res.status(201).json({
       user: {
         email: user.email,
@@ -20,38 +26,36 @@ const register = async (req, res, next) => {
       },
     });
   } catch (error) {
-    if (error.message.includes("E11000 duplicate key error")) {
-      return next(res.status(409).json(Conflict("Email in use")));
-    }
-    return next(error);
+    next(error);
   }
 };
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
+  try {
+    const user = await User.findOne({
+      email,
+    });
 
-  const user = await User.findOne({
-    email,
-  });
+    const isPasswordValid = await bcrypt.compare(password, user?.password);
 
-  const isPasswordValid = await bcrypt.compare(password, user?.password);
+    if (!isPasswordValid || !user) {
+      throw new Unauthorized("Email or password is wrong");
+    }
 
-  if (!isPasswordValid || !user) {
-    return next(
-      res.status(401).json(Unauthorized("Email or password is wrong"))
-    );
+    const payload = { id: user._id };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
+
+    res.status(200).json({
+      token,
+      user: {
+        email: user.email,
+        subscription: user.subscription,
+      },
+    });
+  } catch (error) {
+    next(error);
   }
-
-  const payload = { id: user._id };
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
-
-  return res.status(200).json({
-    token,
-    user: {
-      email: user.email,
-      subscription: user.subscription,
-    },
-  });
 };
 
 const logout = async (req, res) => {

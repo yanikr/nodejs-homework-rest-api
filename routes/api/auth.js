@@ -6,7 +6,11 @@ const {
   logout,
   currentUser,
 } = require("../../controllers/authController");
-const { validateBody, joiRegisterSchema, auth } = require("../../middlewares");
+const {
+  validateBody,
+  joiRegisterSchema,
+  auth,
+} = require("../../middlewares/index");
 const router = express.Router();
 
 router.post("/register", validateBody(joiRegisterSchema), register);
