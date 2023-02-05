@@ -32,6 +32,9 @@ const joiRegisterSchema = Joi.object({
 const updateStatusSchema = Joi.object({
   favorite: Joi.boolean().required(),
 });
+const resendEmailSchema = Joi.object({
+  email: Joi.string().required(),
+});
 
 const auth = async (req, res, next) => {
   const authHeader = req.headers.authorization || "";
@@ -81,4 +84,5 @@ module.exports = {
   auth,
   joiRegisterSchema,
   upload,
+  resendEmailSchema,
 };
